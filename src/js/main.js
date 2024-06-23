@@ -5,10 +5,9 @@ import 'izitoast/dist/css/iziToast.min.css';
 
 const breedSelect = document.querySelector('.breed-select');
 const loader = document.querySelector('.loader');
-const error = document.querySelector('.error');
 const catInfo = document.querySelector('.cat-info');
 
-error.style.display = 'none';
+let isIntitialized = false;
 loader.style.display = 'none';
 
 const slimSelectInstance = new SlimSelect({
@@ -28,18 +27,24 @@ function populateBreedSelect(breeds) {
 
 function showLoader() {
   loader.style.display = 'inline-block';
+  if(!isIntitialized) {
+    document.querySelector('.ss-main').style.display = 'none'
+  }
 }
 
 function hideLoader() {
   loader.style.display = 'none';
+  if(!isIntitialized) {
+    document.querySelector('.ss-main').style.display = 'flex'
+    isIntitialized = true;
+  }
 }
 
-function showError() {
-  error.style.display = 'block';
-}
-
-function hideError() {
-  error.style.display = 'none';
+function showError(message) {
+  iziToast.error({
+    title: 'Error',
+    message: message,
+  });
 }
 
 function updateCatInfo(cat) {
@@ -60,11 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(err => {
       hideLoader();
-      showError();
-      iziToast.error({
-        title: 'Error',
-        message: `Failed to fetch breeds. Please try again later. (${err})`,
-      });
+      showError('Failed to load breed information. Please try again later.');
     });
 });
 
@@ -73,7 +74,6 @@ breedSelect.addEventListener('change', event => {
   if (!breedId) return;
 
   showLoader();
-  hideError();
   catInfo.innerHTML = '';
 
   fetchCatByBreed(breedId)
@@ -83,10 +83,6 @@ breedSelect.addEventListener('change', event => {
     })
     .catch(err => {
       hideLoader();
-      showError();
-      iziToast.error({
-        title: 'Error',
-        message: `Failed to fetch cat information. Please try again later. (${err})`,
-      });
+      showError('Failed to load cat information. Please try again later.');
     });
 });
